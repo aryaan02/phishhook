@@ -1,36 +1,49 @@
 from urllib.parse import urlparse, parse_qs
 
-
 def extract_url_features(url):
-    features = {}
-    parsed_url = urlparse(url)
+    # Normalize URL by removing the scheme (http:// or https://)
+    normalized_url = url.replace('http://', '').replace('https://', '')
+    parsed_url = urlparse('//' + normalized_url)  # Prepend '//' to make urlparse work correctly
+
+    # Parsing query parameters
     query_params = parse_qs(parsed_url.query)
 
-    # Basic features from URL components
-    features["length_url"] = len(url)
-    features["length_hostname"] = len(parsed_url.netloc)
-    features["ip"] = (
-        1
-        if parsed_url.hostname and parsed_url.hostname.replace(".", "").isdigit()
-        else 0
-    )
-    features["nb_dots"] = url.count(".")
-    features["nb_hyphens"] = url.count("-")
-    features["nb_at"] = url.count("@")
-    features["nb_qm"] = url.count("?")
-    features["nb_and"] = url.count("&")
-    features["nb_or"] = url.count("|")
-    features["nb_eq"] = len(query_params)
-    features["nb_underscore"] = url.count("_")
-    features["nb_tilde"] = url.count("~")
-    features["nb_percent"] = url.count("%")
-    features["nb_slash"] = url.count("/")
-    features["nb_star"] = url.count("*")
-    features["nb_colon"] = url.count(":")
-    features["nb_comma"] = url.count(",")
-    features["nb_semicolumn"] = url.count(";")
-    features["nb_dollar"] = url.count("$")
-    features["nb_space"] = url.count(" ")
-    features["nb_dslash"] = url.count("//")
+    # Prepare to extract features
+    hostname = parsed_url.hostname if parsed_url.hostname else ""
+    path = parsed_url.path if parsed_url.path else ""
+    digits_in_url = sum(c.isdigit() for c in url)
+    digits_in_hostname = sum(c.isdigit() for c in hostname)
+
+    # Extract features
+    features = {
+        "length_url": len(url),
+        "length_hostname": len(hostname),
+        "ip": int(parsed_url.hostname.replace('.', '').isdigit()) if parsed_url.hostname else 0,
+        "nb_dots": url.count("."),
+        "nb_hyphens": url.count("-"),
+        "nb_at": url.count("@"),
+        "nb_qm": url.count("?"),
+        "nb_and": url.count("&"),
+        "nb_or": url.count("|"),
+        "nb_eq": len(query_params),
+        "nb_underscore": url.count("_"),
+        "nb_tilde": url.count("~"),
+        "nb_percent": url.count("%"),
+        "nb_slash": url.count("/"),
+        "nb_star": url.count("*"),
+        "nb_colon": url.count(":"),
+        "nb_comma": url.count(","),
+        "nb_semicolumn": url.count(";"),
+        "nb_dollar": url.count("$"),
+        "nb_space": url.count(" "),
+        "nb_www": hostname.count("www"),
+        "nb_com": hostname.count(".com"),
+        "nb_dslash": url.count("//"),
+        "http_in_path": 1 if "http" in path else 0,
+        "https_token": 1 if "https" in hostname else 0,
+        "ratio_digits_url": digits_in_url / len(url) if url else 0,
+        "ratio_digits_host": digits_in_hostname / len(hostname) if hostname else 0,
+        "punycode": 1 if 'xn--' in hostname else 0
+    }
 
     return features

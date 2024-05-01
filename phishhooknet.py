@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class PhishHookNet(nn.Module):
     def __init__(self, input_size):
         super(PhishHookNet, self).__init__()

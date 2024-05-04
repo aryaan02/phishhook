@@ -10,7 +10,7 @@ CORS(app)
 
 # Load your trained model (ensure the model is available in the environment)
 model = PhishHookNet(input_size=16)  # Adjust based on your actual model
-model.load_state_dict(torch.load("phishing_url_model.pth"))
+model.load_state_dict(torch.load("phishing_uci_url_model.pth"))
 model.eval()
 
 

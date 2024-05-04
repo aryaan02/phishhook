@@ -15,7 +15,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 
           // Simulate fetching data for each link
           simulateFetch(url).then((data) => {
-            const responseText = `Probability: ${data.probability}, Is Phishing: ${data.is_phishing}`;
+            const responseText = `Probability: ${data.probability.toFixed(2)}, Is Phishing: ${data.is_phishing}`;
             const responseNode = document.createElement("span");
             responseNode.textContent = responseText;
             li.appendChild(responseNode);
@@ -34,13 +34,21 @@ function listLinks() {
 }
 
 function simulateFetch(link) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockData = {
-        probability: Math.random().toFixed(2), // Random probability for demonstration
-        is_phishing: Math.random() > 0.5 ? "Yes" : "No", // Randomly decide if phishing or not
-      };
-      resolve(mockData);
-    }, 500); // Simulate a shorter delay
+  return fetch(`http://localhost:5000/predict`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ url: link })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
   });
 }
+

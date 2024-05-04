@@ -51,13 +51,26 @@ Array.from(links).forEach((link) => {
 });
 
 function simulateFetch(url) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockData = {
-        probability: Math.random().toFixed(2), // Random probability for demonstration
-        is_phishing: Math.random() > 0.5 ? "Yes" : "No", // Randomly decide if phishing or not
-      };
-      resolve(mockData);
-    }, 500);
+  return fetch('http://localhost:5000/predict', {  // Adjust the URL/port as necessary
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({url: url})
+  })
+  .then(response => response.json())
+  .then(data => {
+    return {
+      probability: data.probability.toFixed(2),
+      is_phishing: data.is_phishing === "Yes" ? "Yes" : "No"
+    };
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    return {
+      probability: "0.00",
+      is_phishing: "No"
+    };
   });
 }
+

@@ -1,6 +1,38 @@
+import re
 from urllib.parse import urlparse, parse_qs
 
-def extract_url_features(url):
+def extract_uci_url_features(url):
+    features = {}
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    path = parsed_url.path
+
+    # Extract features
+    features['URLLength'] = len(url)
+    features['DomainLength'] = len(domain)
+    features['IsDomainIP'] = int(bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain)))
+    features['TLD'] = parsed_url.hostname.split('.')[-1] if parsed_url.hostname else ''
+    features['TLDLength'] = len(features['TLD'])
+    del features['TLD']
+    features['NoOfSubDomain'] = len(domain.split('.')) - 2
+    features['HasObfuscation'] = int('//' in path or '@' in url)
+    features['IsHTTPS'] = int(parsed_url.scheme == 'https')
+    features['NoOfEqualsInURL'] = url.count('=')
+    features['NoOfQMarkInURL'] = url.count('?')
+    features['NoOfAmpersandInURL'] = url.count('&')
+    features['NoOfOtherSpecialCharsInURL'] = sum(map(url.count, ['#', '$', '%', '^', '*', '(', ')', '+']))
+
+    # Calculate character and digit ratios
+    total_chars = len(url)
+    features['NoOfLettersInURL'] = len(re.findall('[a-zA-Z]', url))
+    features['LetterRatioInURL'] = features['NoOfLettersInURL'] / total_chars if total_chars > 0 else 0
+    features['NoOfDegitsInURL'] = len(re.findall('\d', url))
+    features['DegitRatioInURL'] = features['NoOfDegitsInURL'] / total_chars if total_chars > 0 else 0
+    features['SpacialCharRatioInURL'] = features['NoOfOtherSpecialCharsInURL'] / total_chars if total_chars > 0 else 0
+
+    return features
+
+def extract_kaggle_url_features(url):
     # Normalize URL by removing the scheme (http:// or https://)
     normalized_url = url.replace('http://', '').replace('https://', '')
     parsed_url = urlparse('//' + normalized_url)  # Prepend '//' to make urlparse work correctly

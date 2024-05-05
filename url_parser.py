@@ -1,38 +1,75 @@
 import re
 from urllib.parse import urlparse, parse_qs
 
+
 def extract_uci_url_features(url):
+    """
+    Extracts features from a URL for phishing detection (UCI Dataset).
+
+    Args:
+        url (str): The URL to extract features from.
+
+    Returns:
+        dict: A dictionary containing the extracted features.
+    """
+    # Parse the URL
     parsed_url = urlparse(url)
     domain = parsed_url.netloc
     path = parsed_url.path
 
-    cleaned_url = url.replace('http://www.', '').replace('https://www.', '')
+    # Clean the URL by removing the scheme (http:// or https://)
+    cleaned_url = url.replace("http://www.", "").replace("https://www.", "")
 
+    # Extract features
     features = {
-        'URLLength': len(url),
-        'DomainLength': len(domain),
-        'IsDomainIP': int(bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain))),
-        'TLDLength': len(parsed_url.hostname.split('.')[-1]) if parsed_url.hostname else 0,
-        'NoOfSubDomain': len(domain.split('.')) - 2,
-        'HasObfuscation': int('//' in path or '@' in url),
-        'IsHTTPS': int(parsed_url.scheme == 'https'),
-        'NoOfEqualsInURL': url.count('='),
-        'NoOfQMarkInURL': url.count('?'),
-        'NoOfAmpersandInURL': url.count('&'),
-        'NoOfOtherSpecialCharsInURL': sum(url.count(c) for c in [';', ':', '@', '%', '-', '_', '~']),
-        'SpacialCharRatioInURL': sum(url.count(c) for c in [';', ':', '@', '%', '-', '_', '~']) / len(url) if len(url) > 0 else 0,
-        'NoOfLettersInURL': sum(c.isalpha() for c in cleaned_url),
-        'LetterRatioInURL': sum(c.isalpha() for c in cleaned_url) / len(url) if len(url) > 0 else 0,
-        'NoOfDegitsInURL': sum(c.isdigit() for c in url),
-        'DegitRatioInURL': sum(c.isdigit() for c in url) / len(url) if len(url) > 0 else 0
+        "URLLength": len(url),
+        "DomainLength": len(domain),
+        "IsDomainIP": int(
+            bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain))
+        ),
+        "TLDLength": (
+            len(parsed_url.hostname.split(".")[-1]) if parsed_url.hostname else 0
+        ),
+        "NoOfSubDomain": len(domain.split(".")) - 2,
+        "HasObfuscation": int("//" in path or "@" in url),
+        "IsHTTPS": int(parsed_url.scheme == "https"),
+        "NoOfEqualsInURL": url.count("="),
+        "NoOfQMarkInURL": url.count("?"),
+        "NoOfAmpersandInURL": url.count("&"),
+        "NoOfOtherSpecialCharsInURL": sum(
+            url.count(c) for c in [";", ":", "@", "%", "-", "_", "~"]
+        ),
+        "SpacialCharRatioInURL": (
+            sum(url.count(c) for c in [";", ":", "@", "%", "-", "_", "~"]) / len(url)
+            if len(url) > 0
+            else 0
+        ),
+        "NoOfLettersInURL": sum(c.isalpha() for c in cleaned_url),
+        "LetterRatioInURL": (
+            sum(c.isalpha() for c in cleaned_url) / len(url) if len(url) > 0 else 0
+        ),
+        "NoOfDegitsInURL": sum(c.isdigit() for c in url),
+        "DegitRatioInURL": (
+            sum(c.isdigit() for c in url) / len(url) if len(url) > 0 else 0
+        ),
     }
 
     return features
 
+
 def extract_kaggle_url_features(url):
+    """
+    Extracts features from a URL for phishing detection (Kaggle Dataset).
+
+    Args:
+        url (str): The URL to extract features from.
+
+    Returns:
+        dict: A dictionary containing the extracted features.
+    """
     # Normalize URL by removing the scheme (http:// or https://)
-    normalized_url = url.replace('http://', '').replace('https://', '')
-    parsed_url = urlparse('//' + normalized_url)  # Prepend '//' to make urlparse work correctly
+    normalized_url = url.replace("http://", "").replace("https://", "")
+    parsed_url = urlparse("//" + normalized_url)
 
     # Parsing query parameters
     query_params = parse_qs(parsed_url.query)
@@ -47,7 +84,11 @@ def extract_kaggle_url_features(url):
     features = {
         "length_url": len(url),
         "length_hostname": len(hostname),
-        "ip": int(parsed_url.hostname.replace('.', '').isdigit()) if parsed_url.hostname else 0,
+        "ip": (
+            int(parsed_url.hostname.replace(".", "").isdigit())
+            if parsed_url.hostname
+            else 0
+        ),
         "nb_dots": url.count("."),
         "nb_hyphens": url.count("-"),
         "nb_at": url.count("@"),
@@ -72,7 +113,7 @@ def extract_kaggle_url_features(url):
         "https_token": 1 if "https" in hostname else 0,
         "ratio_digits_url": digits_in_url / len(url) if url else 0,
         "ratio_digits_host": digits_in_hostname / len(hostname) if hostname else 0,
-        "punycode": 1 if 'xn--' in hostname else 0
+        "punycode": 1 if "xn--" in hostname else 0,
     }
 
     return features

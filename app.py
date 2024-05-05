@@ -18,18 +18,16 @@ model.eval()
 def predict():
     data = request.get_json(force=True)
     url = data["url"]
-    print(url)
     features = extract_uci_url_features(url)
-    print(features)
     feature_values = list(features.values())
     input_tensor = torch.tensor([feature_values], dtype=torch.float32)
 
     with torch.no_grad():
-        probability = model(input_tensor).item()
-        predicted_class = "Yes" if probability > 0.5 else "No"
-        print(f"Predicted class: {predicted_class}, Probability: {probability}")
+        output = model(input_tensor).item()
+        predicted_class = "Yes" if output > 0.5 else "No"
+        print(f"Predicted class: {predicted_class}, Probability: {output}")
 
-    return jsonify({"probability": probability, "is_phishing": predicted_class})
+    return jsonify({"probability": output, "is_phishing": predicted_class})
 
 
 if __name__ == "__main__":

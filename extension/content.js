@@ -8,7 +8,7 @@ Array.from(links).forEach((link) => {
 
       // Create and style the tooltip
       const tooltip = document.createElement("span");
-      tooltip.textContent = "Warning: Phishing Link!";
+      tooltip.textContent = "Warning: " + (data.probability * 100) + "% Phishing Link!";
       tooltip.style.visibility = "hidden";
       tooltip.style.width = "140px";
       tooltip.style.backgroundColor = "black";
@@ -56,21 +56,21 @@ function simulateFetch(url) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({url: url})
+    body: JSON.stringify({ url: url })
   })
-  .then(response => response.json())
-  .then(data => {
-    return {
-      probability: data.probability.toFixed(2),
-      is_phishing: data.is_phishing === "Yes" ? "Yes" : "No"
-    };
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    return {
-      probability: "0.00",
-      is_phishing: "No"
-    };
-  });
+    .then(response => response.json())
+    .then(data => {
+      return {
+        probability: data.probability.toFixed(2),
+        is_phishing: data.is_phishing === "Yes" ? "Yes" : "No"
+      };
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      return {
+        probability: "0.00",
+        is_phishing: "No"
+      };
+    });
 }
 

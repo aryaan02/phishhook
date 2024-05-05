@@ -15,7 +15,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 
           // Simulate fetching data for each link
           simulateFetch(url).then((data) => {
-            const responseText = `Probability: ${data.probability.toFixed(2)}, Is Phishing: ${data.is_phishing}`;
+            const responseText = `Probability: ${data.probability.toFixed(2) * 100}%, Is Phishing: ${data.is_phishing}`;
             const responseNode = document.createElement("span");
             responseNode.textContent = responseText;
             li.appendChild(responseNode);
@@ -41,14 +41,14 @@ function simulateFetch(link) {
     },
     body: JSON.stringify({ url: link })
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .catch(error => {
-    console.error('There has been a problem with your fetch operation:', error);
-  });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('There has been a problem with your fetch operation:', error);
+    });
 }
 

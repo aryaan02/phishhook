@@ -2,33 +2,30 @@ import re
 from urllib.parse import urlparse, parse_qs
 
 def extract_uci_url_features(url):
-    features = {}
     parsed_url = urlparse(url)
     domain = parsed_url.netloc
     path = parsed_url.path
 
-    # Extract features
-    features['URLLength'] = len(url)
-    features['DomainLength'] = len(domain)
-    features['IsDomainIP'] = int(bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain)))
-    features['TLD'] = parsed_url.hostname.split('.')[-1] if parsed_url.hostname else ''
-    features['TLDLength'] = len(features['TLD'])
-    del features['TLD']
-    features['NoOfSubDomain'] = len(domain.split('.')) - 2
-    features['HasObfuscation'] = int('//' in path or '@' in url)
-    features['IsHTTPS'] = int(parsed_url.scheme == 'https')
-    features['NoOfEqualsInURL'] = url.count('=')
-    features['NoOfQMarkInURL'] = url.count('?')
-    features['NoOfAmpersandInURL'] = url.count('&')
-    features['NoOfOtherSpecialCharsInURL'] = sum(map(url.count, ['#', '$', '%', '^', '*', '(', ')', '+']))
+    cleaned_url = url.replace('http://www.', '').replace('https://www.', '')
 
-    # Calculate character and digit ratios
-    total_chars = len(url)
-    features['NoOfLettersInURL'] = len(re.findall('[a-zA-Z]', url))
-    features['LetterRatioInURL'] = features['NoOfLettersInURL'] / total_chars if total_chars > 0 else 0
-    features['NoOfDegitsInURL'] = len(re.findall('\d', url))
-    features['DegitRatioInURL'] = features['NoOfDegitsInURL'] / total_chars if total_chars > 0 else 0
-    features['SpacialCharRatioInURL'] = features['NoOfOtherSpecialCharsInURL'] / total_chars if total_chars > 0 else 0
+    features = {
+        'URLLength': len(url),
+        'DomainLength': len(domain),
+        'IsDomainIP': int(bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain))),
+        'TLDLength': len(parsed_url.hostname.split('.')[-1]) if parsed_url.hostname else 0,
+        'NoOfSubDomain': len(domain.split('.')) - 2,
+        'HasObfuscation': int('//' in path or '@' in url),
+        'IsHTTPS': int(parsed_url.scheme == 'https'),
+        'NoOfEqualsInURL': url.count('='),
+        'NoOfQMarkInURL': url.count('?'),
+        'NoOfAmpersandInURL': url.count('&'),
+        'NoOfOtherSpecialCharsInURL': sum(url.count(c) for c in [';', ':', '@', '%', '-', '_', '~']),
+        'SpacialCharRatioInURL': sum(url.count(c) for c in [';', ':', '@', '%', '-', '_', '~']) / len(url) if len(url) > 0 else 0,
+        'NoOfLettersInURL': sum(c.isalpha() for c in cleaned_url),
+        'LetterRatioInURL': sum(c.isalpha() for c in cleaned_url) / len(url) if len(url) > 0 else 0,
+        'NoOfDegitsInURL': sum(c.isdigit() for c in url),
+        'DegitRatioInURL': sum(c.isdigit() for c in url) / len(url) if len(url) > 0 else 0
+    }
 
     return features
 

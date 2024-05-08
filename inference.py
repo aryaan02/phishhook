@@ -1,11 +1,11 @@
 import torch
 
-from url_parser import extract_uci_url_features
+from url_parser import extract_url_features
 from phishhooknet import PhishHookNet
 
 # Load the model
 model = PhishHookNet(input_size=16)
-model.load_state_dict(torch.load("phishing_uci_url_model.pth"))
+model.load_state_dict(torch.load("phishing_url_model.pth"))
 model.eval()
 
 
@@ -20,7 +20,7 @@ def infer(url):
         dict: A dictionary containing the probability of the URL being a phishing URL and the predicted class.
     """
     # Extract features from the URL
-    features = extract_uci_url_features(url)
+    features = extract_url_features(url)
     feature_values = list(features.values())
     input_tensor = torch.tensor([feature_values], dtype=torch.float32)
 

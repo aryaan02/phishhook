@@ -164,3 +164,9 @@ cython_debug/
 
 # ML Model
 *.pth
+
+# PDF
+*.pdf
+
+# ZIP files
+*.zip
